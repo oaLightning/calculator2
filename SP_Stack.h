@@ -47,15 +47,18 @@ typedef struct {
 	double value;
 } SP_STACK_ELEMENT;
 
+
+#define MAX_NUMBER_IN_STACK (1024)
 /**
  * This is a declaration of struct which represent a stack.
  * You will need to define the stack in SP_Stack.c
  * You can do so by copying the following code to SP_Stack.c:
- *
- * struct sp_stack_struct {
- * 		//Definition goes here
- * };
  */
+struct sp_stack_struct {
+	SP_STACK_ELEMENT 	elements[MAX_NUMBER_IN_STACK];
+	unsigned int 		current_top;
+};
+
 typedef struct sp_stack_struct SP_STACK;
 
 /**
