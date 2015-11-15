@@ -48,6 +48,12 @@ typedef struct {
 } SP_STACK_ELEMENT;
 
 
+/**
+ * The notes said that at no time there were going to be more thatn 1024 elements in the
+ * stack, so we have the stack preallocate all the needed space. If we want to support 
+ * a dynamic amount of elements in the stack, it would be easier to modify SP_STACK_ELEMENT
+ * to have a "previous" variable and implement a linked-list using them.
+ */
 #define MAX_NUMBER_IN_STACK (1024)
 /**
  * This is a declaration of struct which represent a stack.
