@@ -43,6 +43,25 @@ char* getLineFromUser(SP_AUX_MSG* msg);
 void freeLineFromUser(char* line);
 
 /**
+ * Copies a static message (likley error message) to dynamically allocated memory
+ * to unify flows in the code;
+ *
+ * Messages:
+ *    SP_AUX_NULL_PARAMETER - In case message is NULL
+ * 		SP_AUX_ALLOCATION_ERROR - In case allocation failed.
+ *
+ * @param
+ * 		SP_AUX_MSG* msg - Pointer which has the memory location where the message
+ * 					   	        will be stored. if msg==NULL then the function doesn't
+ * 						          set the value of *msg.
+ *    char* message   - The message to copy to dynamic memory 
+ * @return
+ *		A copy of the given message that needs to be freed with
+ *    the freeLineFromUser function
+ */
+char* copyConstMessageToPool(SP_AUX_MSG* msg, char* message);
+
+/**
  * Advances the current position in the line to the next symbol or number 
  * that need to be parsed
  * 

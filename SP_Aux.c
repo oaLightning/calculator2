@@ -13,6 +13,24 @@ void freeLineFromFser(char* line) {
     }
 }
 
+char* copyConstMessageToPool(SP_AUX_MSG* msg, char* message) {
+    char* return_value = NULL;
+    
+    VERIFY_CONDITION_AND_SET_ERROR(NULL != message, msg, SP_AUX_NULL_PARAMETER);
+    // Note - Here we take into account the null byte at the end of the line
+    int size_to_alloc = strlen(message) + sizeof(*message);
+    
+    return_value = malloc(size_to_alloc);
+    VERIFY_CONDITION_AND_SET_ERROR(NULL != return_value, msg, SP_AUX_ALLOCATION_ERROR);
+    
+    // Note - Here we want to make sure that there is enough space for strncpy to copy
+    // Note - the null byte as well
+    strncpy(return_value, message, size_to_alloc-1);
+    
+cleanup:
+    return return_value;
+}
+
 char* advanceToNextToken(SP_AUX_MSG* msg, char* position);
 
 unsigned int parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
