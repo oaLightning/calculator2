@@ -10,7 +10,7 @@
  * the message returned by the operation. Each returned message will be defined
  * in the operation later.
  */
-enum SP_AUX_MSG {
+typedef enum {
   SP_AUX_SUCCESS = 0,
   SP_AUX_NULL_PARAMETER,
   SP_AUX_LINE_END,
@@ -18,7 +18,7 @@ enum SP_AUX_MSG {
   SP_AUX_NOT_NUMBER,
   SP_AUX_INTERNAL_PARSE_NUMBER_ERROR,
   SP_AUX_NOT_AN_OPERATION,
-};
+} SP_AUX_MSG;
 
 /**
  * Receives a single input line from the user 
