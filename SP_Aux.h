@@ -18,6 +18,7 @@ typedef enum {
   SP_AUX_NOT_NUMBER,
   SP_AUX_INTERNAL_PARSE_NUMBER_ERROR,
   SP_AUX_NOT_AN_OPERATION,
+  SP_AUX_INPUT_ERROR,
 } SP_AUX_MSG;
 
 /**
@@ -25,6 +26,8 @@ typedef enum {
  *
  * Messages:
  * 		SP_AUX_ALLOCATION_ERROR - In case allocation failed.
+ *    SP_AUX_INPUT_ERROR      - In case there is a problem receiving the input 
+ *                              from the user
  *
  * @param
  * 		SP_AUX_MSG* msg - Pointer which has the memory location where the message

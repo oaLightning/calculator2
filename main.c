@@ -25,6 +25,7 @@
  *      This message needs to be freed using the freeLineFromUser function.
  */
 char* calculateLineResult(char* line) {
+    char* return_value = NULL;
     SP_STACK_MSG msg = SP_STACK_SUCCESS;
     SP_STACK* numbers_stack = NULL;
     SP_STACK* operations_stack = NULL;
@@ -40,6 +41,7 @@ char* calculateLineResult(char* line) {
 cleanup:
     spStackDestroy(operations_stack);
     spStackDestroy(numbers_stack);
+    return return_value;
 }
 
 int main() {
@@ -62,8 +64,8 @@ int main() {
         printf("%s", result);
         
     cleanup:
-        freeLineFromFser(line);
-        freeLineFromFser(result);
+        freeLineFromUser(line);
+        freeLineFromUser(result);
     }
     
     return return_value;
