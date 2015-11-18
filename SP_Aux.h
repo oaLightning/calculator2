@@ -137,5 +137,18 @@ SP_STACK_ELEMENT_TYPE parseOperation(SP_AUX_MSG* msg, char* position, char** nex
  */
 bool isEndMessage(SP_AUX_MSG* msg, char* line);
 
+void pushNumber(SP_STACK_MSG* msg, SP_STACK* stack, double number);
+
+double popNumber(SP_STACK_MSG* msg, SP_STACK* stack);
+
+void pushOperation(SP_STACK_MSG* msg, SP_STACK* stack, SP_STACK_ELEMENT_TYPE operation);
+
+SP_STACK_ELEMENT_TYPE popOperation(SP_STACK_MSG* msg, SP_STACK* stack);
+
+int getOperationPrecendence(SP_STACK_ELEMENT_TYPE op);
+
+double performOperation(SP_AUX_MSG* msg, double first_number, double second_number, SP_STACK_ELEMENT_TYPE operation);
+
+void performTopStackOperation(SP_AUX_MSG* aux_msg, SP_STACK_MSG* stack_msg, SP_STACK* numbers_stack, SP_STACK* operations_stack);
 
 #endif // __SP_AUX__
