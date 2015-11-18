@@ -6,6 +6,8 @@
 #include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
+#include "limits.h"
+#include "errno.h"
 
 #define VERIFY_CONDITION(cond)  \
     if (!(cond)) {              \

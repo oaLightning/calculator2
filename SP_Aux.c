@@ -59,20 +59,11 @@ cleanup:
 
 char* advanceToNextToken(SP_AUX_MSG* msg, char* position) {
     char* return_value = NULL;
-    char* current_position = position;
-    const char CHAR_TO_PASS = ' ';
+    char* DELEMITERS = " \t\r\n";
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != position, msg, SP_AUX_NULL_PARAMETER);
     
-    while(*current_position) {
-        if (CHAR_TO_PASS == *current_position) {
-            current_position++;
-        }
-        else {
-            return_value = current_position;
-            break;
-        }
-    }
+    return_value = strtok(position, DELEMITERS);
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != return_value, msg, SP_AUX_LINE_END);
     CLEAR_MSG(msg);
@@ -81,7 +72,27 @@ cleanup:
     return return_value;
 }
 
-unsigned int parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
+unsigned long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position) {
+    unsigned long return_value = 0;
+    
+    VERIFY_CONDITION_AND_SET_ERROR(NULL != position, msg, SP_AUX_NULL_PARAMETER);
+    VERIFY_CONDITION_AND_SET_ERROR(NULL != next_position, msg, SP_AUX_NULL_PARAMETER);
+    
+    errno = 0;
+    
+    return_value = strtol(position, next_position, 10);
+    if (0 == return_value) {
+        VERIFY_CONDITION_AND_SET_ERROR(*next_position != position, msg, SP_AUX_NOT_NUMBER);
+    }
+    else if ((LONG_MIN == return_value) || (LONG_MAX == return_value)) {
+        VERIFY_CONDITION_AND_SET_ERROR(errno != ERANGE, msg, SP_AUX_INTERNAL_PARSE_NUMBER_ERROR);
+    }
+    
+    CLEAR_MSG(msg);
+    
+cleanup:
+    return return_value;
+}
 
 SP_STACK_ELEMENT_TYPE parseOperation(SP_AUX_MSG* msg, char* position, char** next_position) {
     SP_STACK_ELEMENT_TYPE return_value = UNKNOWN;

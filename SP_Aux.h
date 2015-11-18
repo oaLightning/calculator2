@@ -101,7 +101,7 @@ char* advanceToNextToken(SP_AUX_MSG* msg, char* position);
  * @return
  *      The number parsed from the input
  */
-unsigned int parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
+unsigned long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
 
 /**
  * Reads an operation from the given input, and returns the place where we should 
