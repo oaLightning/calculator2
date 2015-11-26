@@ -3,6 +3,7 @@
  */
 
 /* TODO: document internal functions */
+/* TODO: re-add push-pop helper functions, and refactor the long functions (calculateExpression, performTopOperation, parseLine) */
 
 #include "SP_Aux.h"
 #include "SP_Stack.h"
