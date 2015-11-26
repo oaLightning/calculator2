@@ -21,7 +21,7 @@ SP_STACK_ELEMENT_TYPE parseOperation(char* string, SP_AUX_MSG* msg);
 
 double calculateExpression(SP_STACK_ELEMENT* elements, unsigned int elements_count, SP_AUX_MSG* msg);
 void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP_AUX_MSG* msg);
-int getOperationPrecendence(SP_STACK_ELEMENT_TYPE op);
+int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op);
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg);
 long rangeSum(long a, long b);
 
@@ -236,7 +236,7 @@ double calculateExpression(SP_STACK_ELEMENT* elements,
                 VERIFY_STACK_MSG_OK(stack_msg);
                 SP_STACK_ELEMENT_TYPE top_operation = top_element->type;
 
-                if (getOperationPrecendence(operation) > getOperationPrecendence(top_operation)) {
+                if (getOperationPrecedence(operation) > getOperationPrecedence(top_operation)) {
                     break;
                 }
 
@@ -278,7 +278,7 @@ cleanup:
     return result;
 }
 
-int getOperationPrecendence(SP_STACK_ELEMENT_TYPE op)
+int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op)
 {
     switch (op)
     {
