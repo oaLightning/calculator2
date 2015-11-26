@@ -138,9 +138,9 @@ bool TEST_NULL_ARGUMENTS()
 	return true;
 }
 
-int main(){
-	RUN_TEST(TEST1);
-	RUN_TEST(TEST_NULL_ARGUMENTS);
-	RUN_TEST(TEST_FULL_SCENARIO);
-	return 0;
-}
+//int main(){
+//	RUN_TEST(TEST1);
+//	RUN_TEST(TEST_NULL_ARGUMENTS);
+//	RUN_TEST(TEST_FULL_SCENARIO);
+//	return 0;
+//}

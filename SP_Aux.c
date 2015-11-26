@@ -1,41 +1,30 @@
+/*
+ * Auxiliary Functions Module
+ */
 
 // TODO - Think if we want to skip tabs as well in advanceToNextToken
 
 #include "SP_Aux.h"
 #include "common.h"
 
-#define CLEAR_MSG(msg) *(msg) = SP_AUX_SUCCESS;
-#define MAX_LINE_LENGTH (200)
+#define CLEAR_MSG(msg) SET_MESSAGE(msg, SP_AUX_SUCCESS)
 
-char* getLineFromUser(SP_AUX_MSG* msg) {
-    char* line = NULL;
+/*
+ * Function Implementation
+ */
+
+void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg)
+{
     char* fgets_result = NULL;
-    bool got_data = false;
-    
-    // Note - There is no line on purpose, so that it looks like an interperter
-    printf(">>");
-    
-    line = malloc(*line * (MAX_LINE_LENGTH + 1));
-    VERIFY_CONDITION_AND_SET_ERROR(NULL != line, msg, SP_AUX_ALLOCATION_ERROR);
-    
-    fgets_result = fgets(line, MAX_LINE_LENGTH, stdin);
+
+    fgets_result = fgets(buffer, size, stdin);
     VERIFY_CONDITION_AND_SET_ERROR(0 == ferror(stdin), msg, SP_AUX_INPUT_ERROR);
     VERIFY_CONDITION_AND_SET_ERROR(fgets_result != NULL, msg, SP_AUX_INPUT_ERROR);
     
-    got_data = true;
     CLEAR_MSG(msg);
     
 cleanup:
-    if (!got_data) {
-        free(line);
-    }
-    return line;
-}
-
-void freeLineFromUser(char* line) {
-    if (NULL != line) {
-        free(line);
-    }
+    return;
 }
 
 char* copyConstMessageToPool(SP_AUX_MSG* msg, char* message) {
@@ -43,7 +32,7 @@ char* copyConstMessageToPool(SP_AUX_MSG* msg, char* message) {
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != message, msg, SP_AUX_NULL_PARAMETER);
     // Note - Here we take into account the null byte at the end of the line
-    int size_to_alloc = strlen(message) + sizeof(*message);
+    size_t size_to_alloc = strlen(message) + sizeof(*message);
     
     return_value = malloc(size_to_alloc);
     VERIFY_CONDITION_AND_SET_ERROR(NULL != return_value, msg, SP_AUX_ALLOCATION_ERROR);
@@ -59,11 +48,11 @@ cleanup:
 
 char* advanceToNextToken(SP_AUX_MSG* msg, char* position) {
     char* return_value = NULL;
-    char* DELEMITERS = " \t\r\n";
+    const char* DELIMITERS = " \t\r\n";
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != position, msg, SP_AUX_NULL_PARAMETER);
     
-    return_value = strtok(position, DELEMITERS);
+    return_value = strtok(position, DELIMITERS);
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != return_value, msg, SP_AUX_LINE_END);
     CLEAR_MSG(msg);
@@ -72,14 +61,15 @@ cleanup:
     return return_value;
 }
 
-unsigned long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position) {
-    unsigned long return_value = 0;
+long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position) {
+    long return_value = 0;
     
     VERIFY_CONDITION_AND_SET_ERROR(NULL != position, msg, SP_AUX_NULL_PARAMETER);
     VERIFY_CONDITION_AND_SET_ERROR(NULL != next_position, msg, SP_AUX_NULL_PARAMETER);
     
     errno = 0;
-    
+
+    /* TODO: make sure that the string doesn't start with +/- */
     return_value = strtol(position, next_position, 10);
     if (0 == return_value) {
         VERIFY_CONDITION_AND_SET_ERROR(*next_position != position, msg, SP_AUX_NOT_NUMBER);
@@ -131,4 +121,22 @@ bool isEndMessage(SP_AUX_MSG* msg, char* line) {
     
 cleanup:
     return return_value;
+}
+
+void pushNumber(SP_STACK_MSG* msg, SP_STACK* stack, double number)
+{
+    SP_STACK_ELEMENT element = {.type = NUMBER , .value = number};
+    spStackPush(stack, element, msg);
+}
+
+void pushOperation(SP_STACK_MSG* msg, SP_STACK* stack, SP_STACK_ELEMENT_TYPE operation)
+{
+    SP_STACK_ELEMENT element = {.type = operation , .value = 0};
+    spStackPush(stack, element, msg);
+}
+
+char* getErrorMessage(SP_STACK_MSG stack_msg, SP_AUX_MSG aux_msg)
+{
+    /* TODO */
+    return "error";
 }

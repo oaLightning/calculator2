@@ -1,8 +1,15 @@
+/*
+ * Auxiliary Functions Module
+ */
 
 #ifndef __SP_AUX__
 #define __SP_AUX__
 
 #include "SP_Stack.h"
+
+/*
+ * Constants
+ */
 
 /**
  * Defines a messaging mechanism to indicate errors in operations.
@@ -19,31 +26,30 @@ typedef enum {
   SP_AUX_INTERNAL_PARSE_NUMBER_ERROR,
   SP_AUX_NOT_AN_OPERATION,
   SP_AUX_INPUT_ERROR,
+  SP_AUX_PRINT_ERROR,
 } SP_AUX_MSG;
+
+#define MAX_LINE_INPUT_LENGTH (200)
+
+/*
+ * Functions
+ */
 
 /**
  * Receives a single input line from the user 
  *
  * Messages:
- * 		SP_AUX_ALLOCATION_ERROR - In case allocation failed.
- *    SP_AUX_INPUT_ERROR      - In case there is a problem receiving the input 
+ *    SP_AUX_INPUT_ERROR      - In case there is a problem receiving the input
  *                              from the user
  *
  * @param
+ *      char* buffer    - pre-allocated buffer to store line in
+ *      int size        - buffer size
  * 		SP_AUX_MSG* msg - Pointer which has the memory location where the message
  * 					   	  will be stored. if msg==NULL then the function doesn't
  * 						  set the value of *msg.
- * @return
- *		A line of text entered by the user
  */
-char* getLineFromUser(SP_AUX_MSG* msg);
-
-/**
- * Frees a previously received line from the user
- * @param char* line -  The previously received line to free. If line == NULL nothing
- *                      happens
- */
-void freeLineFromUser(char* line);
+void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg);
 
 /**
  * Copies a static message (likley error message) to dynamically allocated memory
@@ -101,7 +107,7 @@ char* advanceToNextToken(SP_AUX_MSG* msg, char* position);
  * @return
  *      The number parsed from the input
  */
-unsigned long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
+long parseNumber(SP_AUX_MSG* msg, char* position, char** next_position);
 
 /**
  * Reads an operation from the given input, and returns the place where we should 
