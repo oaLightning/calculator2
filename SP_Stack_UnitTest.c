@@ -1,7 +1,5 @@
 #include "SP_Stack.h"
-#include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #define FAIL(msg) do {\
 		fprintf(stderr,"%s Line %d: %s", __FILE__, __LINE__, msg);\
@@ -13,12 +11,6 @@
                         FAIL("expression is false :: "); \
                 } \
         } while (0)
-
-#define ASSERT_FALSE(expression) do { \
-                if((expression)) { \
-                        FAIL("expression is true  ::"); \
-                } \
-		} while (0)
 
 #define RUN_TEST(f) do { \
 			if(f()==true){ \
@@ -138,9 +130,9 @@ bool TEST_NULL_ARGUMENTS()
 	return true;
 }
 
-//int main(){
-//	RUN_TEST(TEST1);
-//	RUN_TEST(TEST_NULL_ARGUMENTS);
-//	RUN_TEST(TEST_FULL_SCENARIO);
-//	return 0;
-//}
+int main(){
+	RUN_TEST(TEST1);
+	RUN_TEST(TEST_NULL_ARGUMENTS);
+	RUN_TEST(TEST_FULL_SCENARIO);
+	return 0;
+}
