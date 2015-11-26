@@ -1,34 +1,46 @@
+/*
+ * Common Utilities
+ */
+
 
 #ifndef __COMMON__
 #define __COMMON__
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "stdio.h"
-#include "limits.h"
-#include "errno.h"
-
-/* TODO: wrap multiline macros with do { } while */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <limits.h>
+#include <errno.h>
+#include <assert.h>
 
 #define VERIFY_CONDITION(cond)  \
-    if (!(cond)) {              \
-        goto cleanup;           \
-    }
+    do {                        \
+        if (!(cond)) {          \
+            goto cleanup;       \
+        }                       \
+    } while (0)
     
 
 #define SET_MESSAGE(msg, value)  \
-    if (NULL != (msg)) {         \
-        *(msg) = (value);        \
-    }
+    do {                         \
+        if (NULL != (msg)) {     \
+            *(msg) = (value);    \
+        }                        \
+    } while (0)
 
-// TODO - Maybe add a debug print in here so we would get a stack trace of
-// TODO - errors when we debug. If we do that then this file will probably
-// TODO - be useful for the next exercises as well
+#define FAIL(msg, error_value)          \
+    do {                                \
+        SET_MESSAGE(msg, error_value);  \
+        goto cleanup;                   \
+    } while (0)
+
+/* TODO: add debug print ? */
 #define VERIFY_CONDITION_AND_SET_ERROR(cond, msg, error_value)  \
-    if (!(cond)) {                                              \
-        SET_MESSAGE(msg, error_value);                          \
-        goto cleanup;                                           \
-    }
+    do {                                                        \
+        if (!(cond)) {                                          \
+            FAIL(msg, error_value);                             \
+        }                                                       \
+    } while (0)
 
 #endif // __COMMON__

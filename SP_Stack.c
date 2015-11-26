@@ -1,8 +1,12 @@
-
+/*
+ * Stack Module Implementation
+ */
 
 #include "common.h"
 
 #include "SP_Stack.h"
+
+/* TODO: change implementation to dynamic stack via linked list ?? */
 
 /**
  * The notes said that at no time there were going to be more than 1024 elements in the
@@ -15,7 +19,8 @@
 /*
  * Struct Implementation
  */
-struct sp_stack_struct {
+struct sp_stack_struct
+{
 	SP_STACK_ELEMENT 	elements[MAX_NUMBER_IN_STACK];
 	unsigned int 		current_top;
 };
@@ -26,7 +31,8 @@ struct sp_stack_struct {
  * Function Implementation
  */
 
-SP_STACK* spStackCreate(SP_STACK_MSG* msg) {
+SP_STACK* spStackCreate(SP_STACK_MSG* msg)
+{
     SP_STACK* created_stack = malloc(sizeof(*created_stack));
     VERIFY_CONDITION_AND_SET_ERROR(NULL != created_stack, msg, SP_STACK_ERROR_ALLOCATION_FAILED);
     
@@ -37,14 +43,16 @@ cleanup:
     return created_stack;
 }
 
-void spStackDestroy(SP_STACK* stack) {
+void spStackDestroy(SP_STACK* stack)
+{
     VERIFY_CONDITION(NULL != stack);
     free(stack);
 cleanup:
     return;
 }
 
-SP_STACK_ELEMENT* spStackTop (SP_STACK* stack, SP_STACK_MSG* msg) {
+SP_STACK_ELEMENT* spStackTop (SP_STACK* stack, SP_STACK_MSG* msg)
+{
     SP_STACK_ELEMENT* return_value = NULL;
     VERIFY_CONDITION_AND_SET_ERROR(NULL != stack, msg, SP_STACK_ERROR_NULL_ARGUMENT);
     VERIFY_CONDITION_AND_SET_ERROR(stack->current_top != 0, msg, SP_STACK_ERROR_IS_EMPTY);
@@ -56,7 +64,8 @@ cleanup:
     return return_value;
 }
 
-SP_STACK* spStackPop(SP_STACK* stack, SP_STACK_MSG* msg) {
+SP_STACK* spStackPop(SP_STACK* stack, SP_STACK_MSG* msg)
+{
     VERIFY_CONDITION_AND_SET_ERROR(NULL != stack, msg, SP_STACK_ERROR_NULL_ARGUMENT);
     VERIFY_CONDITION_AND_SET_ERROR(stack->current_top != 0, msg, SP_STACK_ERROR_IS_EMPTY);
     
@@ -67,7 +76,8 @@ cleanup:
     return stack;
 }
 
-SP_STACK* spStackPush(SP_STACK* stack, SP_STACK_ELEMENT newElement,SP_STACK_MSG* msg) {
+SP_STACK* spStackPush(SP_STACK* stack, SP_STACK_ELEMENT newElement,SP_STACK_MSG* msg)
+{
     VERIFY_CONDITION_AND_SET_ERROR(NULL != stack, msg, SP_STACK_ERROR_NULL_ARGUMENT);
     VERIFY_CONDITION_AND_SET_ERROR(stack->current_top != MAX_NUMBER_IN_STACK, msg, SP_STACK_ERROR_ALLOCATION_FAILED);
     
@@ -79,7 +89,8 @@ cleanup:
     return stack;
 }
 
-bool spStackIsEmpty(SP_STACK* stack, SP_STACK_MSG* msg) {
+bool spStackIsEmpty(SP_STACK* stack, SP_STACK_MSG* msg)
+{
     bool return_value = false;
     VERIFY_CONDITION_AND_SET_ERROR(NULL != stack, msg, SP_STACK_ERROR_NULL_ARGUMENT);
 
