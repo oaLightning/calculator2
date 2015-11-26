@@ -5,23 +5,26 @@
 #include "SP_Stack.h"
 
 /**
- * The notes said that at no time there were going to be more thatn 1024 elements in the
+ * The notes said that at no time there were going to be more than 1024 elements in the
  * stack, so we have the stack preallocate all the needed space. If we want to support 
  * a dynamic amount of elements in the stack, it would be easier to modify SP_STACK_ELEMENT
  * to have a "previous" variable and implement a linked-list using them.
  */
 #define MAX_NUMBER_IN_STACK (1024)
-/**
- * This is a declaration of struct which represent a stack.
- * You will need to define the stack in SP_Stack.c
- * You can do so by copying the following code to SP_Stack.c:
+
+/*
+ * Struct Implementation
  */
 struct sp_stack_struct {
 	SP_STACK_ELEMENT 	elements[MAX_NUMBER_IN_STACK];
 	unsigned int 		current_top;
 };
 
-#define CLEAR_MSG(msg) *(msg) = SP_STACK_SUCCESS;
+#define CLEAR_MSG(msg) SET_MESSAGE(msg, SP_STACK_SUCCESS)
+
+/*
+ * Function Implementation
+ */
 
 SP_STACK* spStackCreate(SP_STACK_MSG* msg) {
     SP_STACK* created_stack = malloc(sizeof(*created_stack));
