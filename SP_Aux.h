@@ -102,6 +102,9 @@ bool isEndMessage(const char* string, SP_AUX_MSG* msg);
  * 					   	  will be stored. if msg==NULL then the function doesn't
  *           			  set the value of *msg.
  *
+ * @preconditions
+ *      strlen(string) <= MAX_LINE_INPUT_LENGTH
+ *
  * @return
  *      Calculation result.
  */

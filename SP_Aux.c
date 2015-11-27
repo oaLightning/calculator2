@@ -2,7 +2,7 @@
  * Auxiliary Functions Module
  */
 
-/* TODO: re-add push-pop helper functions, and refactor the long functions (calculateExpression, performTopOperation, parseExpressionString) */
+/* TODO: refactor calculateExpression */
 
 #include "SP_Aux.h"
 #include "SP_Stack.h"
@@ -89,10 +89,15 @@ double calculateExpressionString(char *string, SP_AUX_MSG* msg)
 {
     double result = 0;
     SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
-    SP_STACK_ELEMENT elements[MAX_LINE_INPUT_LENGTH * 2]; /* TODO: explain */
+    /*
+     * Note: there can't be more elements than chars in a given line,
+     * so this static array should have enough room for all parsed elements.
+     */
+    SP_STACK_ELEMENT elements[MAX_LINE_INPUT_LENGTH];
     unsigned int elements_count;
 
     VERIFY_CONDITION_AND_SET_ERROR(string != NULL, msg, SP_AUX_NULL_PARAMETER);
+    assert(strlen(string) <= MAX_LINE_INPUT_LENGTH);
 
     parseExpressionString(string, elements, &elements_count, &aux_msg);
     assert(aux_msg != SP_AUX_NULL_PARAMETER);
@@ -115,10 +120,10 @@ cleanup:
  * Internal Functions Implementation
  */
 
-/* TODO: allocate dynamically ??? */
 /**
  * Parse the given string, and  if it represents a valid arithmetic expression,
  * set the elements in a pre-allocated array accordingly.
+ * The given array must have enough room for all the parsed elements.
  * Note: This function alters the given string, putting '\0' chars in it as it is tokenized.
  *
  * Messages:
