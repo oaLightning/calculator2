@@ -2,7 +2,6 @@
  * Auxiliary Functions Module
  */
 
-/* TODO: document internal functions */
 /* TODO: re-add push-pop helper functions, and refactor the long functions (calculateExpression, performTopOperation, parseExpressionString) */
 
 #include "SP_Aux.h"
