@@ -6,8 +6,6 @@
 
 #include "SP_Stack.h"
 
-/* TODO: change implementation to dynamic stack via linked list ?? */
-
 /**
  * The notes said that at no time there were going to be more than 1024 elements in the
  * stack, so we have the stack preallocate all the needed space. If we want to support 

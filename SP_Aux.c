@@ -30,6 +30,8 @@ bool isDigit(char c);
 SP_STACK_ELEMENT_TYPE parseOperation(const char* string, SP_AUX_MSG* msg);
 
 double calculateExpression(const SP_STACK_ELEMENT* elements, unsigned int elements_count, SP_AUX_MSG* msg);
+void performPrecedingOperation(SP_STACK *numbers_stack, SP_STACK *operations_stack, int operation_precedence,
+                               SP_AUX_MSG *msg);
 void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP_AUX_MSG* msg);
 int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op);
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg);
@@ -340,25 +342,11 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
             VERIFY_STACK_MSG_OK(stack_msg);
         } else {
             SP_STACK_ELEMENT_TYPE operation = element->type;
-            while (true) {
-                bool isEmpty = spStackIsEmpty(operations_stack, &stack_msg);
-                VERIFY_STACK_MSG_OK(stack_msg);
-                if (isEmpty) {
-                    break;
-                }
-
-                SP_STACK_ELEMENT *top_element = spStackTop(operations_stack, &stack_msg);
-                VERIFY_STACK_MSG_OK(stack_msg);
-                SP_STACK_ELEMENT_TYPE top_operation = top_element->type;
-
-                if (getOperationPrecedence(operation) > getOperationPrecedence(top_operation)) {
-                    break;
-                }
-
-                performTopOperation(numbers_stack, operations_stack, &aux_msg);
-                assert(aux_msg != SP_AUX_NULL_PARAMETER);
-                VERIFY_AUX_MSG_OK(aux_msg);
-            }
+            performPrecedingOperation(numbers_stack,
+                                      operations_stack,
+                                      getOperationPrecedence(operation),
+                                      &aux_msg);
+            VERIFY_AUX_MSG_OK(aux_msg);
 
             spStackPush(operations_stack, *element, &stack_msg);
             VERIFY_STACK_MSG_OK(stack_msg);
@@ -393,6 +381,66 @@ cleanup:
     spStackDestroy(operations_stack);
     spStackDestroy(numbers_stack);
     return result;
+}
+
+/**
+ * Perform all top-most operations on the operation stack
+ * that precede the given operation precedence.
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER         - If numbers_stack or operations_stack is NULL.
+ *      SP_AUX_INTERNAL_STACK_ERROR   - If an internal stack operation failed.
+ *      SP_AUX_INVALID_ARGUMENT       - If the popped operation or numbers are invalid.
+ *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed on the popped numbers.
+ *
+ * @param
+ *      SP_STACK* numbers_stack     - Stack from which to pop and push numbers.
+ *      SP_STACK* operations_stack  - Stack from which to pop operations.
+ *      int operation_precedence    - Precedence threshold
+ *      SP_AUX_MSG* msg             - Pointer which has the memory location where the message
+ * 					   	              will be stored. if msg==NULL then the function doesn't
+ * 						              set the value of *msg.
+ */
+void performPrecedingOperation(SP_STACK *numbers_stack,
+                               SP_STACK *operations_stack,
+                               int operation_precedence,
+                               SP_AUX_MSG *msg)
+{
+    SP_STACK_MSG stack_msg = SP_STACK_SUCCESS;
+    SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
+
+    VERIFY_CONDITION_AND_SET_ERROR(numbers_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
+    VERIFY_CONDITION_AND_SET_ERROR(operations_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
+
+    while (true) {
+        bool isEmpty = spStackIsEmpty(operations_stack, &stack_msg);
+        VERIFY_STACK_MSG_OK(stack_msg);
+        if (isEmpty) {
+            break;
+        }
+
+        SP_STACK_ELEMENT *top_element = spStackTop(operations_stack, &stack_msg);
+        VERIFY_STACK_MSG_OK(stack_msg);
+        SP_STACK_ELEMENT_TYPE element_type = top_element->type;
+        VERIFY_CONDITION_AND_SET_ERROR(element_type >= PLUS && element_type <= DOLLAR, msg, SP_AUX_INVALID_ARGUMENT);
+        int top_operation_precedence = getOperationPrecedence(element_type);
+
+        if (operation_precedence > top_operation_precedence) {
+            break;
+        }
+
+        performTopOperation(numbers_stack, operations_stack, &aux_msg);
+        assert(aux_msg != SP_AUX_NULL_PARAMETER);
+        VERIFY_AUX_MSG_OK(aux_msg);
+    }
+
+cleanup:
+    if (stack_msg != SP_STACK_SUCCESS) {
+        SET_MESSAGE(msg, SP_AUX_INTERNAL_STACK_ERROR);
+    }
+    if (aux_msg != SP_AUX_SUCCESS) {
+        SET_MESSAGE(msg, aux_msg);
+    }
 }
 
 /**

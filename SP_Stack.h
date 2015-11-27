@@ -25,13 +25,15 @@ typedef enum  {
  * the value of that number, otherwise the value is not defined.
  *************************************************/
 typedef enum {
-	PLUS,
-	MINUS,
-	MULTIPLICATION,
-	DIVISION,
-	DOLLAR,
-	NUMBER,
-	UNKNOWN
+	UNKNOWN 		= 0,
+
+	PLUS 			= 1,
+	MINUS 			= 2,
+	MULTIPLICATION 	= 3,
+	DIVISION 		= 4,
+	DOLLAR 			= 5,
+
+	NUMBER          = 10,
 } SP_STACK_ELEMENT_TYPE;
 
 /**
