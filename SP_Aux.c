@@ -199,6 +199,27 @@ cleanup:
     return return_value;
 }
 
+/**
+ * Calculate the result of an arithmetic expression of the form:
+ *     [num] <op> [num] <op> ... <op> [num]
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER         - If elements is NULL.
+ *      SP_AUX_INVALID_ARGUMENT       - If elements_count == 0,
+ *                                      or if the elements are not in the correct form.
+ *      SP_AUX_INTERNAL_STACK_ERROR   - If and internal stack operation failed.
+ *      SP_AUX_INVALID_RESULT         - If an operation in the expression can't be performed.
+ *
+ * @param
+ *      SP_STACK_ELEMENT* elements  - Pointer to array of arithmetic elements.
+ *      unsigned int elements_count - Number of elements in the array given.
+ *      SP_AUX_MSG* msg             - Pointer which has the memory location where the message
+ * 					   	              will be stored. if msg==NULL then the function doesn't
+ * 						              set the value of *msg.
+ *
+ * @return
+ *      Calculation result
+ */
 double calculateExpression(SP_STACK_ELEMENT* elements,
                            unsigned int elements_count,
                            SP_AUX_MSG* msg)
@@ -209,6 +230,7 @@ double calculateExpression(SP_STACK_ELEMENT* elements,
     SP_STACK *numbers_stack = NULL;
     SP_STACK *operations_stack = NULL;
 
+    VERIFY_CONDITION_AND_SET_ERROR(elements != NULL, msg, SP_AUX_NULL_PARAMETER);
     VERIFY_CONDITION_AND_SET_ERROR(elements_count > 0, msg, SP_AUX_INVALID_ARGUMENT);
 
     numbers_stack = spStackCreate(&stack_msg);
@@ -242,6 +264,7 @@ double calculateExpression(SP_STACK_ELEMENT* elements,
                 }
 
                 performTopOperation(numbers_stack, operations_stack, &aux_msg);
+                assert(aux_msg != SP_AUX_NULL_PARAMETER);
                 VERIFY_AUX_MSG_OK(aux_msg);
             }
 
@@ -252,6 +275,7 @@ double calculateExpression(SP_STACK_ELEMENT* elements,
 
     while (!spStackIsEmpty(operations_stack, NULL)) {
         performTopOperation(numbers_stack, operations_stack, &aux_msg);
+        assert(aux_msg != SP_AUX_NULL_PARAMETER);
         VERIFY_AUX_MSG_OK(aux_msg);
     }
 
@@ -279,9 +303,23 @@ cleanup:
     return result;
 }
 
-int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op)
+/**
+ * Get the precedence value of an operation.
+ * This value can be compared against the value of another
+ * operation to determine which one precedent the other.
+ *
+ * @param
+ *      SP_STACK_ELEMENT_TYPE operation - Operation to examine.
+ *
+ * @preconditions
+ *      operation is one of {PLUS, MINUS, MULTIPLICATION, DIVISION, DOLLAR}.
+ *
+ * @return
+ *      Operation precedence value
+ */
+int getOperationPrecedence(SP_STACK_ELEMENT_TYPE operation)
 {
-    switch (op)
+    switch (operation)
     {
         case PLUS:
             return 1;
@@ -298,6 +336,23 @@ int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op)
     }
 }
 
+/**
+ * Pop the top operation and numbers from the given stacks,
+ * perform the operation, and push the result to the number stack.
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER         - If numbers_stack or operations_stack is NULL.
+ *      SP_AUX_INTERNAL_STACK_ERROR   - If and internal stack operation failed.
+ *      SP_AUX_INVALID_ARGUMENT       - If the popped operation or numbers are invalid.
+ *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed on the popped numbers.
+ *
+ * @param
+ *      SP_STACK* numbers_stack     - Stack from which to pop and push numbers.
+ *      SP_STACK* operations_stack  - Stack from which to pop operation.
+ *      SP_AUX_MSG* msg             - Pointer which has the memory location where the message
+ * 					   	              will be stored. if msg==NULL then the function doesn't
+ * 						              set the value of *msg.
+ */
 void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP_AUX_MSG* msg)
 {
     SP_STACK_MSG stack_msg = SP_STACK_SUCCESS;
@@ -314,12 +369,14 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
 
     top_element = spStackTop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
+    VERIFY_CONDITION_AND_SET_ERROR(top_element->type == NUMBER, msg, SP_AUX_INVALID_ARGUMENT);
     double x = top_element->value;
     spStackPop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
     top_element = spStackTop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
+    VERIFY_CONDITION_AND_SET_ERROR(top_element->type == NUMBER, msg, SP_AUX_INVALID_ARGUMENT);
     double y = top_element->value;
     spStackPop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
