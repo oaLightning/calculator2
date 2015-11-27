@@ -75,15 +75,15 @@ void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg);
  *      SP_AUX_NULL_PARAMETER - If the given string is NULL.
  * 
  * @param
- *      char* string    - The string to check.
- *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
- * 					   	  will be stored. if msg==NULL then the function doesn't
- *           			  set the value of *msg.
+ *      const char* string  - The string to check.
+ *      SP_AUX_MSG* msg     - Pointer which has the memory location where the message
+ * 					   	      will be stored. if msg==NULL then the function doesn't
+ *           			      set the value of *msg.
  * 
  * @return
  *      true iff the string represents a quit command.
  */
-bool isEndMessage(char* string, SP_AUX_MSG* msg);
+bool isEndMessage(const char* string, SP_AUX_MSG* msg);
 
 /**
  * Parse the given string, and  if it represents a valid arithmetic expression,

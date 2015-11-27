@@ -16,11 +16,11 @@
  */
 
 void parseExpressionString(char *string, SP_STACK_ELEMENT *elements, unsigned int *elements_count, SP_AUX_MSG *msg);
-bool isNumber(char* string);
+bool isNumber(const char* string);
 bool isDigit(char c);
-SP_STACK_ELEMENT_TYPE parseOperation(char* string, SP_AUX_MSG* msg);
+SP_STACK_ELEMENT_TYPE parseOperation(const char* string, SP_AUX_MSG* msg);
 
-double calculateExpression(SP_STACK_ELEMENT* elements, unsigned int elements_count, SP_AUX_MSG* msg);
+double calculateExpression(const SP_STACK_ELEMENT* elements, unsigned int elements_count, SP_AUX_MSG* msg);
 void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP_AUX_MSG* msg);
 int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op);
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg);
@@ -44,7 +44,7 @@ cleanup:
     return;
 }
 
-bool isEndMessage(char*string, SP_AUX_MSG* msg)
+bool isEndMessage(const char*string, SP_AUX_MSG* msg)
 {
     bool return_value = false;
     int strcmp_result = 0;
@@ -169,19 +169,19 @@ cleanup:
  * Note: this function return false for strings such as: "-123", "+123", "1.0".
  *
  * @param
- *      char* string - String to check.
+ *      const char* string - String to check.
  *
  * @return
  *      true iff string is a number made of digits only.
  *      if string is NULL false is returned.
  */
-bool isNumber(char* string)
+bool isNumber(const char* string)
 {
     if (string == NULL) {
         return false;
     }
 
-    char* c = string;
+    const char* c = string;
 
     if (*c == '\0') {
         return false;
@@ -219,15 +219,15 @@ bool isDigit(char c)
  *      SP_AUX_INVALID_EXPRESSION   - If the string doesn't represent an operation.
  *
  * @param
- *      char* string    - String to parse.
- *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
- * 					   	  will be stored. if msg==NULL then the function doesn't
- * 						  set the value of *msg.
+ *      const char* string  - String to parse.
+ *      SP_AUX_MSG* msg     - Pointer which has the memory location where the message
+ * 					   	      will be stored. if msg==NULL then the function doesn't
+ * 						      set the value of *msg.
  *
  * @return
  *      Parsed operation.
  */
-SP_STACK_ELEMENT_TYPE parseOperation(char* string, SP_AUX_MSG* msg)
+SP_STACK_ELEMENT_TYPE parseOperation(const char* string, SP_AUX_MSG* msg)
 {
     SP_STACK_ELEMENT_TYPE return_value = UNKNOWN;
 
@@ -274,16 +274,16 @@ cleanup:
  *      SP_AUX_INVALID_RESULT         - If an operation in the expression can't be performed.
  *
  * @param
- *      SP_STACK_ELEMENT* elements  - Pointer to array of arithmetic elements.
- *      unsigned int elements_count - Number of elements in the array given.
- *      SP_AUX_MSG* msg             - Pointer which has the memory location where the message
- * 					   	              will be stored. if msg==NULL then the function doesn't
- * 						              set the value of *msg.
+ *      const SP_STACK_ELEMENT* elements    - Pointer to array of arithmetic elements.
+ *      unsigned int elements_count         - Number of elements in the array given.
+ *      SP_AUX_MSG* msg                     - Pointer which has the memory location where the message
+ * 					   	                      will be stored. if msg==NULL then the function doesn't
+ * 						                      set the value of *msg.
  *
  * @return
  *      Calculation result.
  */
-double calculateExpression(SP_STACK_ELEMENT* elements,
+double calculateExpression(const SP_STACK_ELEMENT* elements,
                            unsigned int elements_count,
                            SP_AUX_MSG* msg)
 {
@@ -305,7 +305,7 @@ double calculateExpression(SP_STACK_ELEMENT* elements,
     spStackPush(numbers_stack, elements[0], &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
-    for (SP_STACK_ELEMENT *element = elements + 1; element < elements + elements_count; ++element) {
+    for (const SP_STACK_ELEMENT *element = elements + 1; element < elements + elements_count; ++element) {
         if (element->type == NUMBER) {
             spStackPush(numbers_stack, *element, &stack_msg);
             VERIFY_STACK_MSG_OK(stack_msg);
