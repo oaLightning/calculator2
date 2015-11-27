@@ -63,7 +63,7 @@ double calculateExpressionLine(char* line, SP_AUX_MSG* msg)
 {
     double result = 0;
     SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
-    SP_STACK_ELEMENT elements[MAX_LINE_INPUT_LENGTH];
+    SP_STACK_ELEMENT elements[MAX_LINE_INPUT_LENGTH * 2]; /* TODO: explain */
     unsigned int elements_count;
 
     parseLine(line, elements, &elements_count, &aux_msg);
@@ -342,6 +342,24 @@ cleanup:
     }
 }
 
+/**
+ * Perform an arithmetic operation on two numbers in the following order: a <op> b.
+ *
+ * Messages:
+ *      SP_AUX_INVALID_ARGUMENT - If the given operation is invalid.
+ *      SP_AUX_INVALID_RESULT   - If operation can't be performed on the given numbers.
+ *
+ * @param
+ *      SP_STACK_ELEMENT_TYPE operation - Operation to perform
+ *      double a                        - First operand
+ *      double b                        - Second operand
+ *      SP_AUX_MSG* msg                 - Pointer which has the memory location where the message
+ * 					   	                  will be stored. if msg==NULL then the function doesn't
+ * 						                  set the value of *msg.
+ *
+ * @return
+ *      Operation result
+ */
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg)
 {
     double result = 0;
@@ -374,7 +392,7 @@ double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_
             break;
         }
         default:
-            assert(false);
+            FAIL(msg, SP_AUX_INVALID_ARGUMENT);
     }
 
     CLEAR_MSG(msg);
@@ -383,6 +401,19 @@ cleanup:
     return result;
 }
 
+/**
+ * Calculate the sum of all integers in range [a, b].
+ *
+ * @param
+ *      long a - Range start
+ *      long b - Range end
+ *
+ * @preconditions
+ *      a <= b
+ *
+ * @return
+ *      Calculation result
+ */
 long rangeSum(long a, long b)
 {
     assert(a <= b);
