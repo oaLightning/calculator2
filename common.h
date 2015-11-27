@@ -35,7 +35,6 @@
         goto cleanup;                   \
     } while (0)
 
-/* TODO: add debug print ? */
 #define VERIFY_CONDITION_AND_SET_ERROR(cond, msg, error_value)  \
     do {                                                        \
         if (!(cond)) {                                          \

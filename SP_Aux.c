@@ -8,7 +8,17 @@
 #include "SP_Stack.h"
 #include "common.h"
 
+/*
+ * Utility Macros
+ */
+
 #define CLEAR_MSG(msg) SET_MESSAGE(msg, SP_AUX_SUCCESS)
+
+/*
+ * Constants
+ */
+
+const char* DELIMITERS = " \t\r\n";
 
 /*
  * Internal Function Declarations
@@ -43,16 +53,32 @@ cleanup:
     return;
 }
 
-bool isEndMessage(const char*string, SP_AUX_MSG* msg)
+bool isEndMessage(const char* string, SP_AUX_MSG* msg)
 {
     bool return_value = false;
-    int strcmp_result = 0;
 
     VERIFY_CONDITION_AND_SET_ERROR(NULL != string, msg, SP_AUX_NULL_PARAMETER);
 
-    /* TODO: should this accept strings like "  <>\n" ?? */
-    strcmp_result = strcmp(string, "<>\n");
+    char string_copy[MAX_LINE_INPUT_LENGTH + 1];
+    strncpy(string_copy, string, sizeof(string_copy) - 1);
+
+    char* token = strtok(string_copy, DELIMITERS);
+    if (token == NULL) {
+        CLEAR_MSG(msg);
+        goto cleanup;
+    }
+
+    int strcmp_result = strcmp(token, "<>");
+
+    /* Expect no more tokens */
+    token = strtok(NULL, DELIMITERS);
+    if (token != NULL) {
+        CLEAR_MSG(msg);
+        goto cleanup;
+    }
+
     return_value = (0 == strcmp_result);
+
     CLEAR_MSG(msg);
 
 cleanup:
@@ -112,7 +138,6 @@ void parseExpressionString(char* string,
                            unsigned int* elements_count,
                            SP_AUX_MSG* msg)
 {
-    const char* DELIMITERS = " \t\r\n";
     SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
     char* token;
 
@@ -304,7 +329,7 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
     spStackPush(numbers_stack, elements[0], &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
-    for (const SP_STACK_ELEMENT *element = elements + 1; element < elements + elements_count; ++element) {
+    for (const SP_STACK_ELEMENT* element = elements + 1; element < elements + elements_count; ++element) {
         if (element->type == NUMBER) {
             spStackPush(numbers_stack, *element, &stack_msg);
             VERIFY_STACK_MSG_OK(stack_msg);
