@@ -2,8 +2,6 @@
  * Auxiliary Functions Module
  */
 
-/* TODO: refactor calculateExpression */
-
 #include "SP_Aux.h"
 #include "SP_Stack.h"
 #include "common.h"
