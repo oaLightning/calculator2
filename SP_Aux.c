@@ -451,6 +451,7 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     SP_STACK_ELEMENT* top_element = spStackTop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     SP_STACK_ELEMENT_TYPE operation = top_element->type;
+    VERIFY_CONDITION_AND_SET_ERROR(operation >= PLUS && operation <= DOLLAR, msg, SP_AUX_INVALID_ARGUMENT);
     spStackPop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
