@@ -15,6 +15,15 @@ bool interact(SP_AUX_MSG* msg);
  * Functions
  */
 
+/**
+ * Main function.
+ * Interact with the user, calculating results of arithmetic expressions,
+ * until a quit command is received.
+ *
+ * @return
+ *      EXIT_SUCCESS if no error was encountered,
+ *      EXIT_FAILURE otherwise.
+ */
 int main()
 {
     int return_value = EXIT_FAILURE;
@@ -35,7 +44,24 @@ cleanup:
     return return_value;
 }
 
-/* TODO: document */
+/**
+ * Make a single user interaction:
+ *      - Get an input line
+ *      - Parse and calculate it, and print the result.
+ *
+ * Messages:
+ *      SP_AUX_INPUT_ERROR          - If there is a problem receiving the input from the user.
+ *      SP_AUX_INTERNAL_STACK_ERROR - If an internal stack operation failed.
+ *      SP_AUX_PRINT_ERROR          - If there is a problem printing.
+ *
+ * @param
+ *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
+ * 					   	  will be stored. if msg==NULL then the function doesn't
+ *           			  set the value of *msg.
+ *
+ * @return
+ *      true iff the quit command was received.
+ */
 bool interact(SP_AUX_MSG* msg)
 {
     bool should_exit = false;
@@ -47,7 +73,7 @@ bool interact(SP_AUX_MSG* msg)
     VERIFY_AUX_MSG_OK(aux_msg);
 
     should_exit = isEndMessage(line, &aux_msg);
-    VERIFY_AUX_MSG_OK(aux_msg);
+    assert(aux_msg == SP_AUX_SUCCESS);
 
     int printf_retval;
     if (should_exit) {
@@ -65,6 +91,7 @@ bool interact(SP_AUX_MSG* msg)
                 printf_retval = printf("Invalid Result!\n");
                 break;
             default:
+                assert(aux_msg != SP_AUX_NULL_PARAMETER);
                 goto cleanup;
         }
         aux_msg = SP_AUX_SUCCESS;

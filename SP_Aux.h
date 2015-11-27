@@ -69,7 +69,7 @@ typedef enum {
 void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg);
 
 /**
- * Check if the given string represents the "quit" command.
+ * Check if the given string represents the quit command.
  * 
  * Messages:
  *      SP_AUX_NULL_PARAMETER - If the given string is NULL.
@@ -81,7 +81,7 @@ void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg);
  *           			  set the value of *msg.
  * 
  * @return
- *      true iff the string represents a "quit" command.
+ *      true iff the string represents a quit command.
  */
 bool isEndMessage(char* string, SP_AUX_MSG* msg);
 
