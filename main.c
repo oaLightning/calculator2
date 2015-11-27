@@ -53,7 +53,7 @@ bool interact(SP_AUX_MSG* msg)
     if (should_exit) {
         printf_retval = printf("Exiting...\n");
     } else {
-        double expression_result = calculateExpressionLine(line, &aux_msg);
+        double expression_result = calculateExpressionString(line, &aux_msg);
         switch (aux_msg) {
             case SP_AUX_SUCCESS:
                 printf_retval = printf("res = %f\n", expression_result);

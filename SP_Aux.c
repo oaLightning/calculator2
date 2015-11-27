@@ -3,7 +3,7 @@
  */
 
 /* TODO: document internal functions */
-/* TODO: re-add push-pop helper functions, and refactor the long functions (calculateExpression, performTopOperation, parseLine) */
+/* TODO: re-add push-pop helper functions, and refactor the long functions (calculateExpression, performTopOperation, parseExpressionString) */
 
 #include "SP_Aux.h"
 #include "SP_Stack.h"
@@ -15,7 +15,7 @@
  * Internal Function Declarations
  */
 
-void parseLine(char* line, SP_STACK_ELEMENT* elements, unsigned int* elements_count, SP_AUX_MSG* msg);
+void parseExpressionString(char *string, SP_STACK_ELEMENT *elements, unsigned int *elements_count, SP_AUX_MSG *msg);
 bool isNumber(char* string);
 bool isDigit(char c);
 SP_STACK_ELEMENT_TYPE parseOperation(char* string, SP_AUX_MSG* msg);
@@ -44,14 +44,15 @@ cleanup:
     return;
 }
 
-bool isEndMessage(char* line, SP_AUX_MSG* msg)
+bool isEndMessage(char*string, SP_AUX_MSG* msg)
 {
     bool return_value = false;
     int strcmp_result = 0;
 
-    VERIFY_CONDITION_AND_SET_ERROR(NULL != line, msg, SP_AUX_NULL_PARAMETER);
+    VERIFY_CONDITION_AND_SET_ERROR(NULL != string, msg, SP_AUX_NULL_PARAMETER);
 
-    strcmp_result = strcmp(line, "<>\n");
+    /* TODO: should this accept strings like "  <>\n" ?? */
+    strcmp_result = strcmp(string, "<>\n");
     return_value = (0 == strcmp_result);
     CLEAR_MSG(msg);
 
@@ -59,17 +60,22 @@ cleanup:
     return return_value;
 }
 
-double calculateExpressionLine(char* line, SP_AUX_MSG* msg)
+double calculateExpressionString(char *string, SP_AUX_MSG* msg)
 {
     double result = 0;
     SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
     SP_STACK_ELEMENT elements[MAX_LINE_INPUT_LENGTH * 2]; /* TODO: explain */
     unsigned int elements_count;
 
-    parseLine(line, elements, &elements_count, &aux_msg);
+    VERIFY_CONDITION_AND_SET_ERROR(string != NULL, msg, SP_AUX_NULL_PARAMETER);
+
+    parseExpressionString(string, elements, &elements_count, &aux_msg);
+    assert(aux_msg != SP_AUX_NULL_PARAMETER);
     VERIFY_AUX_MSG_OK(aux_msg);
 
     result = calculateExpression(elements, elements_count, &aux_msg);
+    assert(aux_msg != SP_AUX_NULL_PARAMETER && aux_msg != SP_AUX_INVALID_ARGUMENT);
+    VERIFY_AUX_MSG_OK(aux_msg);
 
     CLEAR_MSG(msg);
 
@@ -85,19 +91,38 @@ cleanup:
  */
 
 /* TODO: allocate dynamically ??? */
-void parseLine(char* line,
-               SP_STACK_ELEMENT* elements,
-               unsigned int* elements_count,
-               SP_AUX_MSG* msg)
+/**
+ * Parse the given string, and  if it represents a valid arithmetic expression,
+ * set the elements in a pre-allocated array accordingly.
+ * Note: This function alters the given string, putting '\0' chars in it as it is tokenized.
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER       - If string or elements or elements_count is NULL.
+ *      SP_AUX_INVALID_EXPRESSION   - If the string doesn't represent a valid expression.
+ *
+ * @param
+ *      char* string                    - String to parse.
+ *      SP_STACK_ELEMENT* elements      - Pre-allocated array to fill with parsed elements
+ *      unsigned int* elements_count    - Pointer to variable to update with the parsed elements count.
+ *      SP_AUX_MSG* msg                 - Pointer which has the memory location where the message
+ * 					   	                  will be stored. if msg==NULL then the function doesn't
+ *           						      set the value of *msg.
+ */
+void parseExpressionString(char* string,
+                           SP_STACK_ELEMENT* elements,
+                           unsigned int* elements_count,
+                           SP_AUX_MSG* msg)
 {
     const char* DELIMITERS = " \t\r\n";
     SP_AUX_MSG aux_msg = SP_AUX_SUCCESS;
     char* token;
 
+    VERIFY_CONDITION_AND_SET_ERROR(string != NULL, msg, SP_AUX_NULL_PARAMETER);
+    VERIFY_CONDITION_AND_SET_ERROR(elements != NULL, msg, SP_AUX_NULL_PARAMETER);
     VERIFY_CONDITION_AND_SET_ERROR(elements_count != NULL, msg, SP_AUX_NULL_PARAMETER);
     *elements_count = 0;
 
-    token = strtok(line, DELIMITERS);
+    token = strtok(string, DELIMITERS);
     VERIFY_CONDITION_AND_SET_ERROR(token != NULL && isNumber(token),
                                    msg,
                                    SP_AUX_INVALID_EXPRESSION);
@@ -112,6 +137,7 @@ void parseLine(char* line,
         }
 
         SP_STACK_ELEMENT_TYPE operation = parseOperation(token, &aux_msg);
+        assert(aux_msg != SP_AUX_NULL_PARAMETER);
         VERIFY_AUX_MSG_OK(aux_msg);
         element.type = operation;
         element.value = 0;
@@ -138,6 +164,17 @@ cleanup:
     return;
 }
 
+/**
+ * Check if the given string is a number made of digits only.
+ * Note: this function return false for strings such as: "-123", "+123", "1.0".
+ *
+ * @param
+ *      char* string - String to check.
+ *
+ * @return
+ *      true iff string is a number made of digits only.
+ *      if string is NULL false is returned.
+ */
 bool isNumber(char* string)
 {
     if (string == NULL) {
@@ -159,11 +196,37 @@ bool isNumber(char* string)
 
     return true;
 }
+
+/**
+ * Check if the given character is a digit.
+ *
+ * @param
+ *      char c - Character to check.
+ *
+ * @return
+ *      true iff c is a digit.
+ */
 bool isDigit(char c)
 {
     return (c >= '0' && c <= '9');
 }
 
+/**
+ * Parse the given string, and return an operation if it represents one.
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER       - If string is NULL.
+ *      SP_AUX_INVALID_EXPRESSION   - If the string doesn't represent an operation.
+ *
+ * @param
+ *      char* string    - String to parse.
+ *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
+ * 					   	  will be stored. if msg==NULL then the function doesn't
+ * 						  set the value of *msg.
+ *
+ * @return
+ *      Parsed operation.
+ */
 SP_STACK_ELEMENT_TYPE parseOperation(char* string, SP_AUX_MSG* msg)
 {
     SP_STACK_ELEMENT_TYPE return_value = UNKNOWN;
@@ -207,7 +270,7 @@ cleanup:
  *      SP_AUX_NULL_PARAMETER         - If elements is NULL.
  *      SP_AUX_INVALID_ARGUMENT       - If elements_count == 0,
  *                                      or if the elements are not in the correct form.
- *      SP_AUX_INTERNAL_STACK_ERROR   - If and internal stack operation failed.
+ *      SP_AUX_INTERNAL_STACK_ERROR   - If an internal stack operation failed.
  *      SP_AUX_INVALID_RESULT         - If an operation in the expression can't be performed.
  *
  * @param
@@ -218,7 +281,7 @@ cleanup:
  * 						              set the value of *msg.
  *
  * @return
- *      Calculation result
+ *      Calculation result.
  */
 double calculateExpression(SP_STACK_ELEMENT* elements,
                            unsigned int elements_count,
@@ -315,7 +378,7 @@ cleanup:
  *      operation is one of {PLUS, MINUS, MULTIPLICATION, DIVISION, DOLLAR}.
  *
  * @return
- *      Operation precedence value
+ *      Operation precedence value.
  */
 int getOperationPrecedence(SP_STACK_ELEMENT_TYPE operation)
 {
@@ -342,7 +405,7 @@ int getOperationPrecedence(SP_STACK_ELEMENT_TYPE operation)
  *
  * Messages:
  *      SP_AUX_NULL_PARAMETER         - If numbers_stack or operations_stack is NULL.
- *      SP_AUX_INTERNAL_STACK_ERROR   - If and internal stack operation failed.
+ *      SP_AUX_INTERNAL_STACK_ERROR   - If an internal stack operation failed.
  *      SP_AUX_INVALID_ARGUMENT       - If the popped operation or numbers are invalid.
  *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed on the popped numbers.
  *
@@ -415,7 +478,7 @@ cleanup:
  * 						                  set the value of *msg.
  *
  * @return
- *      Operation result
+ *      Operation result.
  */
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg)
 {
@@ -469,7 +532,7 @@ cleanup:
  *      a <= b
  *
  * @return
- *      Calculation result
+ *      Calculation result.
  */
 long rangeSum(long a, long b)
 {

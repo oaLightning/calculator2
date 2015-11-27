@@ -11,15 +11,19 @@
  * Utility Macros
  */
 
-#define VERIFY_STACK_MSG_OK(msg)        \
-    if (SP_STACK_SUCCESS != (msg)) {    \
-        goto cleanup;                   \
-    }
+#define VERIFY_STACK_MSG_OK(msg)            \
+    do {                                    \
+        if (SP_STACK_SUCCESS != (msg)) {    \
+            goto cleanup;                   \
+        }                                   \
+    } while (0)
 
-#define VERIFY_AUX_MSG_OK(msg)        \
-    if (SP_AUX_SUCCESS != (msg)) {    \
-        goto cleanup;                   \
-    }
+#define VERIFY_AUX_MSG_OK(msg)          \
+    do {                                \
+        if (SP_AUX_SUCCESS != (msg)) {  \
+            goto cleanup;               \
+        }                               \
+    } while (0)
 
 /*
  * Constants
@@ -49,37 +53,58 @@ typedef enum {
  */
 
 /**
- * Receives a single input line from the user 
+ * Receive a single input line from the user.
  *
  * Messages:
- *    SP_AUX_INPUT_ERROR      - In case there is a problem receiving the input
- *                              from the user
+ *    SP_AUX_INPUT_ERROR - In case there is a problem receiving the input
+ *                         from the user.
  *
  * @param
- *      char* buffer    - pre-allocated buffer to store line in
- *      int size        - buffer size
+ *      char* buffer    - Pre-allocated buffer to store line in.
+ *      int size        - Buffer size.
  * 		SP_AUX_MSG* msg - Pointer which has the memory location where the message
  * 					   	  will be stored. if msg==NULL then the function doesn't
- * 						  set the value of *msg.
+ *           			  set the value of *msg.
  */
 void getLineFromUser(char* buffer, int size, SP_AUX_MSG* msg);
 
 /**
- * Says if the given line contains only the "quit" message
+ * Check if the given string represents the "quit" command.
  * 
  * Messages:
- *      SP_AUX_NULL_PARAMETER - If the given line is NULL
+ *      SP_AUX_NULL_PARAMETER - If the given string is NULL.
  * 
  * @param
- *      char* line      - The line to compare
- *      SP_AUX_MSG* msg - The message passed in that conveys outward the function's status
+ *      char* string    - The string to check.
+ *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
+ * 					   	  will be stored. if msg==NULL then the function doesn't
+ *           			  set the value of *msg.
  * 
  * @return
- *      Weather or not the program just received a "quit" command
+ *      true iff the string represents a "quit" command.
  */
-bool isEndMessage(char* line, SP_AUX_MSG* msg);
+bool isEndMessage(char* string, SP_AUX_MSG* msg);
 
-/* TODO: doc */
-double calculateExpressionLine(char* line, SP_AUX_MSG* msg);
+/**
+ * Parse the given string, and  if it represents a valid arithmetic expression,
+ * calculate it and return the result.
+ * Note: This function alters the given string, putting '\0' chars in it as it is tokenized.
+ *
+ * Messages:
+ *      SP_AUX_NULL_PARAMETER       - If string is NULL.
+ *      SP_AUX_INVALID_EXPRESSION   - If the string doesn't represent a valid expression.
+ *      SP_AUX_INTERNAL_STACK_ERROR - If an internal stack operation failed.
+ *      SP_AUX_INVALID_RESULT       - If an operation in the expression can't be performed.
+ *
+ * @param
+ *      char* string    - String to parse.
+ *      SP_AUX_MSG* msg - Pointer which has the memory location where the message
+ * 					   	  will be stored. if msg==NULL then the function doesn't
+ *           			  set the value of *msg.
+ *
+ * @return
+ *      Calculation result.
+ */
+double calculateExpressionString(char* string, SP_AUX_MSG* msg);
 
 #endif // __SP_AUX__
