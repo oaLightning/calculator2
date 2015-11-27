@@ -73,8 +73,10 @@ bool interact(SP_AUX_MSG* msg)
     VERIFY_AUX_MSG_OK(aux_msg);
 
     should_exit = isEndMessage(line, &aux_msg);
-    assert(aux_msg == SP_AUX_SUCCESS);
+    assert(aux_msg != SP_AUX_NULL_PARAMETER);
+    VERIFY_AUX_MSG_OK(aux_msg);
 
+    /* Interpret line and print response */
     int printf_retval;
     if (should_exit) {
         printf_retval = printf("Exiting...\n");
@@ -96,7 +98,6 @@ bool interact(SP_AUX_MSG* msg)
         }
         aux_msg = SP_AUX_SUCCESS;
     }
-
     VERIFY_CONDITION_AND_SET_ERROR(printf_retval >= 0, msg, SP_AUX_PRINT_ERROR);
     VERIFY_CONDITION_AND_SET_ERROR(ferror(stdout) == 0, msg, SP_AUX_PRINT_ERROR);
 

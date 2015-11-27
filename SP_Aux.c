@@ -59,10 +59,12 @@ bool isEndMessage(const char* string, SP_AUX_MSG* msg)
 
     VERIFY_CONDITION_AND_SET_ERROR(NULL != string, msg, SP_AUX_NULL_PARAMETER);
 
+    /* Make a copy of the string, because strtok is used to parse it. */
     char string_copy[MAX_LINE_INPUT_LENGTH + 1];
     strncpy(string_copy, string, sizeof(string_copy) - 1);
 
     char* token = strtok(string_copy, DELIMITERS);
+    /* If no tokens found, string is considered empty. */
     if (token == NULL) {
         CLEAR_MSG(msg);
         goto cleanup;
@@ -151,6 +153,7 @@ void parseExpressionString(char* string,
     VERIFY_CONDITION_AND_SET_ERROR(elements_count != NULL, msg, SP_AUX_NULL_PARAMETER);
     *elements_count = 0;
 
+    /* Parse first number */
     token = strtok(string, DELIMITERS);
     VERIFY_CONDITION_AND_SET_ERROR(token != NULL && isNumber(token),
                                    msg,
@@ -159,12 +162,15 @@ void parseExpressionString(char* string,
     elements[*elements_count] = element;
     *elements_count += 1;
 
+    /* Parse the rest as pairs of "<operation> <number>" */
     while (true) {
         token = strtok(NULL, DELIMITERS);
         if (token == NULL) {
+            /* No more pairs */
             break;
         }
 
+        /* Parse operation */
         SP_STACK_ELEMENT_TYPE operation = parseOperation(token, &aux_msg);
         assert(aux_msg != SP_AUX_NULL_PARAMETER);
         VERIFY_AUX_MSG_OK(aux_msg);
@@ -173,6 +179,7 @@ void parseExpressionString(char* string,
         elements[*elements_count] = element;
         *elements_count += 1;
 
+        /* Parse number */
         token = strtok(NULL, DELIMITERS);
         VERIFY_CONDITION_AND_SET_ERROR(token != NULL && isNumber(token),
                                        msg,
@@ -331,9 +338,11 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
     operations_stack = spStackCreate(&stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
+    /* Push first number */
     spStackPush(numbers_stack, elements[0], &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
+    /* Push numbers and operations, performing preceding operations as needed. */
     for (const SP_STACK_ELEMENT* element = elements + 1; element < elements + elements_count; ++element) {
         if (element->type == NUMBER) {
             spStackPush(numbers_stack, *element, &stack_msg);
@@ -351,16 +360,19 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
         }
     }
 
+    /* Perform the rest of the operations */
     while (!spStackIsEmpty(operations_stack, NULL)) {
         performTopOperation(numbers_stack, operations_stack, &aux_msg);
         assert(aux_msg != SP_AUX_NULL_PARAMETER);
         VERIFY_AUX_MSG_OK(aux_msg);
     }
 
+    /* Get result from number stack */
     SP_STACK_ELEMENT *top_element = spStackTop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     result = top_element->value;
 
+    /* Check that there are indeed no more numbers on the stack */
     spStackPop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     assert(spStackIsEmpty(numbers_stack, NULL));
@@ -410,13 +422,17 @@ void performPrecedingOperation(SP_STACK *numbers_stack,
     VERIFY_CONDITION_AND_SET_ERROR(numbers_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
     VERIFY_CONDITION_AND_SET_ERROR(operations_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
 
-    while (true) {
+    /* While the operation stack isn't empty,
+     * and the top operation has higher precedence than the threshold. */
+    while (true)
+    {
         bool isEmpty = spStackIsEmpty(operations_stack, &stack_msg);
         VERIFY_STACK_MSG_OK(stack_msg);
         if (isEmpty) {
             break;
         }
 
+        /* Get the precedence value of the top operation */
         SP_STACK_ELEMENT *top_element = spStackTop(operations_stack, &stack_msg);
         VERIFY_STACK_MSG_OK(stack_msg);
         SP_STACK_ELEMENT_TYPE element_type = top_element->type;
@@ -499,6 +515,7 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     VERIFY_CONDITION_AND_SET_ERROR(numbers_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
     VERIFY_CONDITION_AND_SET_ERROR(operations_stack != NULL, msg, SP_AUX_NULL_PARAMETER);
 
+    /* Pop operation */
     SP_STACK_ELEMENT* top_element = spStackTop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     SP_STACK_ELEMENT_TYPE operation = top_element->type;
@@ -506,6 +523,7 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     spStackPop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
+    /* Pop number */
     top_element = spStackTop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     VERIFY_CONDITION_AND_SET_ERROR(top_element->type == NUMBER, msg, SP_AUX_INVALID_ARGUMENT);
@@ -513,6 +531,7 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     spStackPop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
+    /* Pop number */
     top_element = spStackTop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     VERIFY_CONDITION_AND_SET_ERROR(top_element->type == NUMBER, msg, SP_AUX_INVALID_ARGUMENT);
@@ -520,9 +539,11 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     spStackPop(numbers_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
+    /* Perform operation */
     double result = performOperation(operation, y, x, &aux_msg);
     VERIFY_AUX_MSG_OK(aux_msg);
 
+    /* Push result */
     SP_STACK_ELEMENT element = {.type=NUMBER, .value=result};
     spStackPush(numbers_stack, element, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
