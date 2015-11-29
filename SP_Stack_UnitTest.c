@@ -40,7 +40,9 @@ bool TEST1(){
 	stack = spStackPush(stack,newElement,&msg);
 	ASSERT_TRUE(msg == SP_STACK_SUCCESS);
 	elementPtr = spStackTop(stack,&msg);
-	ASSERT_TRUE(elementPtr->type == newElement.type && elementPtr->value == newElement.value && msg==SP_STACK_SUCCESS);
+	ASSERT_TRUE(elementPtr->type == newElement.type
+				&& elementPtr->value == newElement.value
+				&& msg==SP_STACK_SUCCESS);
 	spStackDestroy(stack);
 	return 1;
 }

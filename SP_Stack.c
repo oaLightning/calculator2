@@ -77,7 +77,8 @@ cleanup:
 SP_STACK* spStackPush(SP_STACK* stack, SP_STACK_ELEMENT newElement,SP_STACK_MSG* msg)
 {
     VERIFY_CONDITION_AND_SET_ERROR(NULL != stack, msg, SP_STACK_ERROR_NULL_ARGUMENT);
-    VERIFY_CONDITION_AND_SET_ERROR(stack->current_top != MAX_NUMBER_IN_STACK, msg, SP_STACK_ERROR_ALLOCATION_FAILED);
+    VERIFY_CONDITION_AND_SET_ERROR(stack->current_top != MAX_NUMBER_IN_STACK,
+                                   msg, SP_STACK_ERROR_ALLOCATION_FAILED);
     
     stack->elements[stack->current_top] = newElement;
     stack->current_top++;

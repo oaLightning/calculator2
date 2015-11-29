@@ -22,14 +22,16 @@ const char* DELIMITERS = " \t\r\n";
  * Internal Function Declarations
  */
 
-void parseExpressionString(char *string, SP_STACK_ELEMENT *elements, unsigned int *elements_count, SP_AUX_MSG *msg);
+void parseExpressionString(char *string, SP_STACK_ELEMENT *elements,
+                           unsigned int *elements_count, SP_AUX_MSG *msg);
 bool isNumber(const char* string);
 bool isDigit(char c);
 SP_STACK_ELEMENT_TYPE parseOperation(const char* string, SP_AUX_MSG* msg);
 
-double calculateExpression(const SP_STACK_ELEMENT* elements, unsigned int elements_count, SP_AUX_MSG* msg);
-void performPrecedingOperation(SP_STACK *numbers_stack, SP_STACK *operations_stack, int operation_precedence,
-                               SP_AUX_MSG *msg);
+double calculateExpression(const SP_STACK_ELEMENT* elements,
+                           unsigned int elements_count, SP_AUX_MSG* msg);
+void performPrecedingOperation(SP_STACK *numbers_stack, SP_STACK *operations_stack,
+                               int operation_precedence, SP_AUX_MSG *msg);
 void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP_AUX_MSG* msg);
 int getOperationPrecedence(SP_STACK_ELEMENT_TYPE op);
 double performOperation(SP_STACK_ELEMENT_TYPE operation, double a, double b, SP_AUX_MSG* msg);
@@ -133,12 +135,12 @@ cleanup:
  *      SP_AUX_INVALID_EXPRESSION   - If the string doesn't represent a valid expression.
  *
  * @param
- *      char* string                    - String to parse.
- *      SP_STACK_ELEMENT* elements      - Pre-allocated array to fill with parsed elements
- *      unsigned int* elements_count    - Pointer to variable to update with the parsed elements count.
- *      SP_AUX_MSG* msg                 - Pointer which has the memory location where the message
- * 					   	                  will be stored. if msg==NULL then the function doesn't
- *           						      set the value of *msg.
+ *      char* string                 - String to parse.
+ *      SP_STACK_ELEMENT* elements   - Pre-allocated array to fill with parsed elements
+ *      unsigned int* elements_count - Pointer to variable to update with the parsed elements count.
+ *      SP_AUX_MSG* msg              - Pointer which has the memory location where the message
+ * 					   	               will be stored. if msg==NULL then the function doesn't
+ *           						   set the value of *msg.
  */
 void parseExpressionString(char* string,
                            SP_STACK_ELEMENT* elements,
@@ -310,11 +312,11 @@ cleanup:
  *      SP_AUX_INVALID_RESULT         - If an operation in the expression can't be performed.
  *
  * @param
- *      const SP_STACK_ELEMENT* elements    - Pointer to array of arithmetic elements.
- *      unsigned int elements_count         - Number of elements in the array given.
- *      SP_AUX_MSG* msg                     - Pointer which has the memory location where the message
- * 					   	                      will be stored. if msg==NULL then the function doesn't
- * 						                      set the value of *msg.
+ *      const SP_STACK_ELEMENT* elements - Pointer to array of arithmetic elements.
+ *      unsigned int elements_count      - Number of elements in the array given.
+ *      SP_AUX_MSG* msg                  - Pointer which has the memory location where the message
+ * 					   	                   will be stored. if msg==NULL then the function doesn't
+ * 						                   set the value of *msg.
  *
  * @return
  *      Calculation result.
@@ -343,7 +345,10 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
     VERIFY_STACK_MSG_OK(stack_msg);
 
     /* Push numbers and operations, performing preceding operations as needed. */
-    for (const SP_STACK_ELEMENT* element = elements + 1; element < elements + elements_count; ++element) {
+    for (const SP_STACK_ELEMENT* element = elements + 1;
+         element < elements + elements_count;
+         ++element)
+    {
         if (element->type == NUMBER) {
             spStackPush(numbers_stack, *element, &stack_msg);
             VERIFY_STACK_MSG_OK(stack_msg);
@@ -361,7 +366,8 @@ double calculateExpression(const SP_STACK_ELEMENT* elements,
     }
 
     /* Perform the rest of the operations */
-    while (!spStackIsEmpty(operations_stack, NULL)) {
+    while (!spStackIsEmpty(operations_stack, NULL))
+    {
         performTopOperation(numbers_stack, operations_stack, &aux_msg);
         assert(aux_msg != SP_AUX_NULL_PARAMETER);
         VERIFY_AUX_MSG_OK(aux_msg);
@@ -401,7 +407,8 @@ cleanup:
  *      SP_AUX_NULL_PARAMETER         - If numbers_stack or operations_stack is NULL.
  *      SP_AUX_INTERNAL_STACK_ERROR   - If an internal stack operation failed.
  *      SP_AUX_INVALID_ARGUMENT       - If the popped operation or numbers are invalid.
- *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed on the popped numbers.
+ *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed
+ *                                      on the popped numbers.
  *
  * @param
  *      SP_STACK* numbers_stack     - Stack from which to pop and push numbers.
@@ -436,7 +443,8 @@ void performPrecedingOperation(SP_STACK *numbers_stack,
         SP_STACK_ELEMENT *top_element = spStackTop(operations_stack, &stack_msg);
         VERIFY_STACK_MSG_OK(stack_msg);
         SP_STACK_ELEMENT_TYPE element_type = top_element->type;
-        VERIFY_CONDITION_AND_SET_ERROR(element_type >= PLUS && element_type <= DOLLAR, msg, SP_AUX_INVALID_ARGUMENT);
+        VERIFY_CONDITION_AND_SET_ERROR(element_type >= PLUS && element_type <= DOLLAR,
+                                       msg, SP_AUX_INVALID_ARGUMENT);
         int top_operation_precedence = getOperationPrecedence(element_type);
 
         if (operation_precedence > top_operation_precedence) {
@@ -498,7 +506,8 @@ int getOperationPrecedence(SP_STACK_ELEMENT_TYPE operation)
  *      SP_AUX_NULL_PARAMETER         - If numbers_stack or operations_stack is NULL.
  *      SP_AUX_INTERNAL_STACK_ERROR   - If an internal stack operation failed.
  *      SP_AUX_INVALID_ARGUMENT       - If the popped operation or numbers are invalid.
- *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed on the popped numbers.
+ *      SP_AUX_INVALID_RESULT         - If the popped operation can't be performed
+ *                                      on the popped numbers.
  *
  * @param
  *      SP_STACK* numbers_stack     - Stack from which to pop and push numbers.
@@ -519,7 +528,8 @@ void performTopOperation(SP_STACK* numbers_stack, SP_STACK* operations_stack, SP
     SP_STACK_ELEMENT* top_element = spStackTop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
     SP_STACK_ELEMENT_TYPE operation = top_element->type;
-    VERIFY_CONDITION_AND_SET_ERROR(operation >= PLUS && operation <= DOLLAR, msg, SP_AUX_INVALID_ARGUMENT);
+    VERIFY_CONDITION_AND_SET_ERROR(operation >= PLUS && operation <= DOLLAR,
+                                   msg, SP_AUX_INVALID_ARGUMENT);
     spStackPop(operations_stack, &stack_msg);
     VERIFY_STACK_MSG_OK(stack_msg);
 
